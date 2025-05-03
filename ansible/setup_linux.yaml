@@ -1,0 +1,26 @@
+---
+- name: Setup Linux
+  hosts: all
+  become: yes
+  tasks:
+    - name: Copy .bashrc file
+      copy:
+        src: ~/.bashrc
+        dest: /home/ec2-user/.bashrc
+        mode: '0444'
+
+    - name: Upgrade all packages
+      dnf:
+        name: "*"
+        state: latest
+
+    - name: Install Java RPM
+      dnf:
+        name: java-17-amazon-corretto
+        state: present
+
+    - name: Install git RPM
+      dnf:
+        name: git
+        state: present
+

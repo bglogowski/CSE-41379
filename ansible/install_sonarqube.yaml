@@ -1,0 +1,38 @@
+---
+- name: Install Sonar Qube
+  hosts: sonarqube
+  become: yes
+  tasks:
+    - name: Copy Java JDK file
+      copy:
+        src: ~/Downloads/jdk-17_linux-x64_bin.tar.gz
+        dest: /home/ec2-user/jdk-17_linux-x64_bin.tar.gz
+        mode: '0444'
+
+    - name: Extract jdk-17_linux-x64_bin.tar.gz into /usr/local
+      unarchive:
+        src: /home/ec2-user/jdk-17_linux-x64_bin.tar.gz
+        dest: /usr/local
+        remote_src: yes
+
+    - name: Copy Sonar Qube Zip file
+      copy:
+        src: ~/Downloads/sonarqube-10.1.0.73491.zip
+        dest: /home/ec2-user/sonarqube-10.1.0.73491.zip
+        mode: '0444'
+
+    - name: Extract sonarqube-10.1.0.73491.zip into /opt
+      unarchive:
+        src: /home/ec2-user/sonarqube-10.1.0.73491.zip
+        dest: /opt
+        remote_src: yes
+
+    - name: Install pip RPM
+      dnf:
+        name: pip
+        state: present
+
+    - name: Install gdown python package
+      pip:
+        name: gdown
+

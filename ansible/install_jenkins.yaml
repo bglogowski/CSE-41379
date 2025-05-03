@@ -1,6 +1,6 @@
 ---
 - name: Install Jenkins
-  hosts: all
+  hosts: jenkins
   become: yes
   tasks:
     - name: Download jenkins.repo
@@ -14,31 +14,10 @@
         key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
         state: present
 
-    - name: Upgrade all packages
-      dnf:
-        name: "*"
-        state: latest
-
-    - name: Install Java RPM
-      dnf:
-        name: java-17-amazon-corretto
-        state: present
-
-    - name: Install git RPM
-      dnf:
-        name: git
-        state: present
-
     - name: Install jenkins RPM
       dnf:
         name: jenkins
         state: present
-
-    - name: Copy initialAdminPassword file
-      copy:
-        src: /tmp/initialAdminPassword
-        dest: /var/lib/jenkins/secrets/initialAdminPassword
-
 
     - name: Enable and start service jenkins, if not started
       service:
@@ -46,3 +25,20 @@
           enabled: yes
           state: started
 
+    - name: Install jenkins RPM
+      dnf:
+        name: jenkins
+        state: present
+
+    - name: Download hashicorp.repo
+      ansible.builtin.get_url:
+        url: https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+        dest: /etc/yum.repos.d/hashicorp.repo
+        mode: '0444'
+
+    - name: Install other tools
+      dnf:
+        name:
+          - ansible
+          - terraform
+        state: latest

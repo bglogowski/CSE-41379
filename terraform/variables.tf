@@ -1,6 +1,13 @@
 variable "key_name" {
-  type       = string
-  default    = "cse41379"
+  type        = string
+  description = "SSH key pair name"
+  default     = "cse41379"
+}
+
+variable "vpc_cidr" {
+  type        = string
+  description = "VPC CIDR value"
+  default     = "10.0.0.0/16"
 }
 
 variable "public_subnet_cidrs" {
