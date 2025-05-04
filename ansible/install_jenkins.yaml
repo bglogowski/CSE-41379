@@ -25,11 +25,6 @@
           enabled: yes
           state: started
 
-    - name: Install jenkins RPM
-      dnf:
-        name: jenkins
-        state: present
-
     - name: Download hashicorp.repo
       ansible.builtin.get_url:
         url: https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo

@@ -1,10 +1,12 @@
 
 resource "aws_vpc" "cse41379" {
- cidr_block = var.vpc_cidr
+  cidr_block           = var.vpc_cidr
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 
- tags = {
-   Name = "CSE-41379 VPC"
- }
+  tags = {
+    Name = "CSE-41379 VPC"
+  }
 }
 
 
@@ -18,8 +20,6 @@ resource "aws_subnet" "public_subnets" {
  }
 }
 
- 
-
 resource "aws_subnet" "private_subnets" {
  count      = length(var.private_subnet_cidrs)
  vpc_id     = aws_vpc.cse41379.id
@@ -29,6 +29,49 @@ resource "aws_subnet" "private_subnets" {
    Name = "CSE-41379 Private Subnet ${count.index + 1}"
  }
 }
+
+resource "aws_eip" "nat_gateway" {
+  count    = length(var.private_subnet_cidrs)
+  domain   = "vpc"
+
+  tags = {
+    "Name" = "CSE-41379 NAT Gateway Public IP ${count.index + 1}"
+  }
+
+}
+
+resource "aws_nat_gateway" "nat_gateway" {
+  count         = length(var.private_subnet_cidrs)
+  allocation_id = element(aws_eip.nat_gateway[*].id, count.index)
+  subnet_id     = element(aws_subnet.public_subnets[*].id, count.index)
+
+  tags = {
+    "Name" = "CSE-41379 NAT Gateway ${count.index + 1}"
+  }
+
+}
+
+resource "aws_route_table" "nat_gateway" {
+  vpc_id = aws_vpc.cse41379.id
+  count         = length(var.private_subnet_cidrs)
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = element(aws_nat_gateway.nat_gateway[*].id, count.index)
+  }
+  tags = {
+    "Name" = "CSE-41379 NAT Route Table ${count.index + 1}"
+  }
+
+}
+
+resource "aws_route_table_association" "nat_gateway" {
+ count          = length(var.private_subnet_cidrs)
+ subnet_id      = element(aws_subnet.private_subnets[*].id, count.index)
+ route_table_id = element(aws_route_table.nat_gateway[*].id, count.index)
+
+}
+
+ 
 
 
 resource "aws_internet_gateway" "ig" {

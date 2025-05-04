@@ -1,0 +1,35 @@
+---
+- name: Install Jenkins Executors
+  hosts: executors
+  become: yes
+  tasks:
+    - name: Download jenkins.repo
+      ansible.builtin.get_url:
+        url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+        dest: /etc/yum.repos.d/jenkins.repo
+        mode: '0444'
+
+    - name: Import RPM key
+      ansible.builtin.rpm_key:
+        key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+        state: present
+
+    - name: Install jenkins RPM
+      dnf:
+        name: jenkins
+        state: present
+
+    - name: Create Jenkins directory
+      file:
+        path: /jenkins
+        state: directory
+        mode: '0755'
+        owner: ec2-user
+
+    - name: Create a symbolic link for Jenkins
+      ansible.builtin.file:
+        src: /jenkins
+        dest: /var/lib/jenkins
+        owner: ec2-user
+        state: link
+
