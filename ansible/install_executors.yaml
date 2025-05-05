@@ -14,10 +14,31 @@
         key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
         state: present
 
+    - name: Copy .bashrc file
+      copy:
+        src: ~/.bashrc
+        dest: /home/ec2-user/.bashrc
+        mode: '0444'
+
+    - name: Upgrade all packages
+      dnf:
+        name: "*"
+        state: latest
+
+    - name: Install Java RPM
+      dnf:
+        name: java-17-amazon-corretto
+        state: present
+
+    - name: Install git RPM
+      dnf:
+        name: git
+        state: present
+
     - name: Install jenkins RPM
       dnf:
         name: jenkins
-        state: present
+        state: absent
 
     - name: Create Jenkins directory
       file:
@@ -32,4 +53,27 @@
         dest: /var/lib/jenkins
         owner: ec2-user
         state: link
+
+    - name: Copy SSH private key
+      copy:
+        src: ~/.ssh/id_rsa
+        dest: /home/ec2-user/.ssh/id_rsa
+        mode: '0400'
+        owner: ec2-user
+
+    - name: Copy SSH public key
+      copy:
+        src: ~/.ssh/id_rsa.pub
+        dest: /home/ec2-user/.ssh/id_rsa.pub
+        mode: '0400'
+        owner: ec2-user
+
+    - name: Get GitHub SSH fingerprints
+      shell: ssh-keyscan github.com > /home/ec2-user/.ssh/known_hosts
+
+    - name: GitHub fingerprint permissions
+      file:
+        path: /home/ec2-user/.ssh/known_hosts
+        mode: '0400'
+        owner: ec2-user
 

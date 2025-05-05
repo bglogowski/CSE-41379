@@ -138,8 +138,8 @@ resource "aws_instance" "sonarqube_server" {
 
 resource "aws_instance" "private_executor_test" {
   count      = length(var.private_subnet_cidrs)
-  ami           = "ami-05572e392e80aee89"
-  instance_type = "t2.micro"
+  ami           = data.aws_ami.linux.id
+  instance_type = "t2.medium"
 
   subnet_id       = element(aws_subnet.private_subnets[*].id, count.index)
   vpc_security_group_ids = [ "${aws_security_group.jenkins_sg.id}", "${aws_security_group.ssh_sg.id}", "${aws_security_group.http_sg.id}" ]
@@ -147,9 +147,29 @@ resource "aws_instance" "private_executor_test" {
 
   iam_instance_profile = aws_iam_instance_profile.jenkins_profile.name
 
+  root_block_device {
+    delete_on_termination = true
+  }
+
 
   tags = {
     Name = "CSE-41379 Jenkins Private Executor Test ${count.index + 1}"
   } 
     
 } 
+
+resource "aws_instance" "bastion" {
+  ami                    = data.aws_ami.linux.id
+  instance_type          = "t2.nano"
+  subnet_id              = aws_subnet.public_subnets[0].id
+  vpc_security_group_ids = [ "${aws_security_group.ssh_sg.id}" ]
+  key_name               = aws_key_pair.generated_key.key_name
+
+  tags = {
+    Name = "CSE-41379 Bastion Host"
+  } 
+    
+} 
+
+
+
