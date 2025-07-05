@@ -1,6 +1,6 @@
 ---
 - name: Add Linux Swap File
-  hosts: executors
+  hosts: jenkins
   become: yes
   tasks:
     - name: Check whether "/swapfile" exists

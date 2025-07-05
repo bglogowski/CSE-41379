@@ -1,6 +1,6 @@
 ---
 - name: Setup Linux
-  hosts: all
+  hosts: java-lts
   become: yes
   tasks:
     - name: Copy .bashrc file

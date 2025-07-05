@@ -1,0 +1,38 @@
+---
+- name: Setup Nexus
+  hosts: nexus
+  become: yes
+  tasks:
+    - name: Copy .bashrc file
+      copy:
+        src: ~/.bashrc
+        dest: /home/ec2-user/.bashrc
+        mode: '0444'
+
+    - name: Upgrade all packages
+      dnf:
+        name: "*"
+        state: latest
+
+    - name: Install Java RPM
+      dnf:
+        name: java-1.8.0-amazon-corretto
+        state: present
+
+    - name: Install git RPM
+      dnf:
+        name: git
+        state: present
+
+#    - name: Unarchive Nexus
+#      unarchive:
+#        src: https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+#        dest: /opt
+#        remote_src: yes
+
+    - name: Extract nexus-3.80.0-06-linux-x86_64.tar.gz into /opt
+      unarchive:
+        src: ~/Downloads/nexus-3.80.0-06-linux-x86_64.tar.gz
+        dest: /opt
+        remote_src: no
+
